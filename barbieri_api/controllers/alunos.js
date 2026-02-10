@@ -1,3 +1,4 @@
+
 const db = require ('../database/connection');
 
 module.exports = {
@@ -128,13 +129,13 @@ async buscarAlunos(request, response) {
     }
 
     const sql = `SELECT * FROM alunos WHERE aluno_nome LIKE ? LIMIT 5;`;
-    const [rows] = await db.query(sql, [`%${busca}%`]);
+        const [rows] = await db.query(sql, [`%${busca}%`]);
 
-    return response.status(200).json({
-      sucesso: true,
-      mensagem: "Resultados encontrados.",
-      dados: rows
-    });
+        return response.status(200).json({
+            sucesso: true,
+            mensagem: "Resultados encontrados.",
+            dados: rows
+        });
   } catch (error) {
     return response.status(500).json({
       sucesso: false,

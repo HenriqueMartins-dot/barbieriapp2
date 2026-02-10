@@ -1,15 +1,15 @@
+
 const db = require('../database/connection');
 
 module.exports = {
     async listarEscolas(request, response) {
         try {
-            const sql = 'SELECT * FROM escolas'; // Consulta para listar todas as escolas
+            const sql = 'SELECT * FROM escolas';
             const escolas = await db.query(sql);
-
             return response.status(200).json({
                 sucesso: true,
                 mensagem: 'Lista de escolas.',
-                dados: escolas[0] // Retorna os dados das escolas
+                dados: escolas[0]
             });
         } catch (error) {
             return response.status(500).json({
@@ -76,7 +76,7 @@ module.exports = {
             const values = [escola_nome, escola_endereco, escola_telefone, id];
     
             const [atualizaDados] = await db.query(sql, values);
-    
+
             // Verifica se alguma linha foi afetada
             if (atualizaDados.affectedRows === 0) {
                 return response.status(404).json({
@@ -84,7 +84,7 @@ module.exports = {
                     mensagem: `Nenhuma escola encontrada com ID ${id}.`
                 });
             }
-    
+
             return response.status(200).json({
                 sucesso: true,
                 mensagem: `Escola ${id} atualizada com sucesso.`,
