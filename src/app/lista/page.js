@@ -363,8 +363,29 @@ const verNotas = async (aluno) => {
       setAlunos(response.data.dados);
     } catch (error) {
       if (error.response) {
-        console.error("Erro ao salvar aluno:", error.response.data);
-        alert(`Erro ao salvar aluno: ${error.response.data.message || error.response.statusText}`);
+        const data = error.response.data;
+        let mensagem = "Erro ao salvar as informações do aluno. Tente novamente.";
+        if (data) {
+          if (typeof data === "string" && data.trim() !== "") {
+            mensagem = data;
+          } else if (typeof data.message === "string" && data.message.trim() !== "") {
+            mensagem = data.message;
+          } else if (typeof data.dados === "string" && data.dados.trim() !== "") {
+            mensagem = data.dados;
+          } else if (error.response.statusText) {
+            mensagem = error.response.statusText;
+          }
+        } else if (error.response.statusText) {
+          mensagem = error.response.statusText;
+        }
+        console.error("Erro ao salvar aluno:", {
+          data,
+          status: error.response.status,
+          statusText: error.response.statusText,
+          headers: error.response.headers,
+          fullResponse: error.response
+        });
+        alert(`Erro ao salvar aluno: ${mensagem}`);
       } else {
         console.error("Erro ao salvar aluno:", error);
         alert("Erro ao salvar as informações do aluno. Tente novamente.");

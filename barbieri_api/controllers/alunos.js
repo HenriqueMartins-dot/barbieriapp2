@@ -8,13 +8,13 @@ module.exports = {
             const alunos = await db.query(sql);
             return response.status(200).json({
                 sucesso: true,
-                mensagem: 'Lista de alunos.',
+                message: 'Lista de alunos.',
                 dados: alunos[0]
             });
         } catch (error) {
             return response.status(500).json({
                 sucesso: false,
-                mensagem: 'Erro na requisição.',
+                message: 'Erro na requisição.',
                 dados: error.message
             });
         }
@@ -48,13 +48,13 @@ module.exports = {
 
             return response.status(200).json({
                 sucesso: true,
-                mensagem: 'Cadastro de aluno realizado com sucesso.',
+                message: 'Cadastro de aluno realizado com sucesso.',
                 dados: execSql[0].insertId
             });
         } catch(error) {
             return response.status(500).json({
                 sucesso: false,
-                mensagem: 'Erro na requisição.',
+                message: 'Erro na requisição.',
                 dados: error.message
             });
         }
@@ -63,7 +63,7 @@ module.exports = {
     async editarAlunos(request, response) {
         try {
             const { id } = request.params;
-            const {
+            let {
                 aluno_nome, data_nascimento, cidade_natal, nome_pai, nome_mae = null,
                 profissao_pai  = null, nacionalidade_pai = null, residencia, matricula_primitiva,
                 matricula_ano_letivo, ano_curso, sexo, observacao = null, 
@@ -71,10 +71,15 @@ module.exports = {
                 cpf = null, rg = null, ra = null, telefones = null // New fields
             } = request.body;
 
+            // Garante que telefones seja um JSON válido (array vazio) se vier vazio, nulo ou só espaços
+            if (telefones === undefined || telefones === null || (typeof telefones === 'string' && telefones.trim() === '')) {
+                telefones = '[]';
+            }
+
             if (!id) {
                 return response.status(400).json({
                     sucesso: false,
-                    mensagem: 'O ID do aluno é obrigatório na URL.'
+                    message: 'O ID do aluno é obrigatório na URL.'
                 });
             }
 
@@ -98,19 +103,19 @@ module.exports = {
             if (atualizaDados.affectedRows === 0) {
                 return response.status(404).json({
                     sucesso: false,
-                    mensagem: `Nenhum aluno encontrado com ID ${id}.`
+                    message: `Nenhum aluno encontrado com ID ${id}.`
                 });
             }
 
             return response.status(200).json({
                 sucesso: true,
-                mensagem: `Aluno ${id} atualizado com sucesso.`,
+                message: `Aluno ${id} atualizado com sucesso.`,
                 dados: atualizaDados.affectedRows
             });
         } catch (error) {
             return response.status(500).json({
                 sucesso: false,
-                mensagem: 'Erro na requisição.',
+                message: 'Erro na requisição.',
                 dados: error.message
             });
         }
@@ -123,7 +128,7 @@ async buscarAlunos(request, response) {
     if (!busca || busca.trim() === "") {
       return response.status(400).json({
         sucesso: false,
-        mensagem: "Parâmetro de busca obrigatório.",
+        message: "Parâmetro de busca obrigatório.",
         dados: []
       });
     }
@@ -133,13 +138,13 @@ async buscarAlunos(request, response) {
 
         return response.status(200).json({
             sucesso: true,
-            mensagem: "Resultados encontrados.",
+            message: "Resultados encontrados.",
             dados: rows
         });
   } catch (error) {
     return response.status(500).json({
       sucesso: false,
-      mensagem: "Erro ao buscar alunos.",
+    message: "Erro ao buscar alunos.",
       dados: error.message
     });
   }
@@ -153,7 +158,7 @@ async buscarAlunos(request, response) {
             if (!id) {
                 return response.status(400).json({
                     sucesso: false,
-                    mensagem: 'O ID do aluno é obrigatório na URL.'
+                    message: 'O ID do aluno é obrigatório na URL.'
                 });
             }
 
@@ -165,19 +170,19 @@ async buscarAlunos(request, response) {
             if (excluir.affectedRows === 0) {
                 return response.status(404).json({
                     sucesso: false,
-                    mensagem: `Nenhum aluno encontrado com ID ${id}.`
+                    message: `Nenhum aluno encontrado com ID ${id}.`
                 });
             }
 
             return response.status(200).json({
                 sucesso: true,
-                mensagem: `Aluno ${id} excluído com sucesso.`,
+                message: `Aluno ${id} excluído com sucesso.`,
                 dados: excluir.affectedRows
             });
         } catch(error) {
             return response.status(500).json({
                 sucesso: false,
-                mensagem: 'Erro na requisição.',
+                message: 'Erro na requisição.',
                 dados: error.message
             });
         }
