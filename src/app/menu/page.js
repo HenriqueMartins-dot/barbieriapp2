@@ -11,6 +11,9 @@ export default function Menu() {
         <Link href="/adicionar">
           <button>Adicionar Alunos</button>
         </Link>
+        <Link href="/funcionarios">
+          <button>Lista de Funcionários</button>
+        </Link>
       </nav>
       <main className={styles.content}>
         <h1>Bem-vindo ao Sistema Escolar</h1>
