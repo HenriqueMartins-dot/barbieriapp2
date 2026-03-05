@@ -49,3 +49,14 @@ CREATE TABLE IF NOT EXISTS notas (
     ciencias REAL,
     FOREIGN KEY(aluno_id) REFERENCES alunos(id)
 );
+
+
+CREATE TABLE IF NOT EXISTS funcionarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    cargo TEXT NOT NULL,
+    data_contratacao TEXT NOT NULL,
+    salario REAL NOT NULL
+);
+
+SHOW CREATE TABLE funcionarios;

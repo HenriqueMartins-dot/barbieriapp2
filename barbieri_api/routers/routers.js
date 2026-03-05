@@ -35,6 +35,14 @@ router.patch('/alunos/:id', AlunosController.editarAlunos);
 router.delete('/alunos/:id', AlunosController.apagarAlunos);
 router.get("/buscar", AlunosController.buscarAlunos);
 
+//router funcionarios
+const FuncionariosController = require('../controllers/funcionarios');
+router.get('/funcionarios', FuncionariosController.listarFuncionarios);
+router.post('/funcionarios', FuncionariosController.cadastrarFuncionario);
+router.patch('/funcionarios/:id', FuncionariosController.editarFuncionario);
+router.delete('/funcionarios/:id', FuncionariosController.apagarFuncionario);
+router.post("/funcionarios/ponto", FuncionariosController.registrarPonto);
+
 
 
 module.exports = router;

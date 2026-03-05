@@ -31,27 +31,48 @@ export default function Home() {
   }, []);
 
   // Função de login
-  const handleLogin = async () => {
-    if (!escola || !senha) {
-      setErro("Por favor, selecione uma escola e preencha a senha.");
-      return;
-    }
+const handleLogin = async () => {
+  if (!escola || !senha) {
+    setErro("Por favor, selecione uma escola e preencha a senha.");
+    return;
+  }
 
-    try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/usuarios/login`, {
+  try {
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/usuarios/login`,
+      {
         escola_id: escola,
         senha: senha,
-      });
-
-      if (response.data.sucesso) {
-        router.push("/menu");
-      } else {
-        setErro("Senha incorreta ou escola não encontrada.");
       }
-    } catch (error) {
-      setErro("Erro ao realizar login.");
+    );
+
+if (response.data.sucesso) {
+
+  const acesso = response.data.acesso;
+
+  // salva no navegador
+  localStorage.setItem("acesso", acesso);
+  localStorage.setItem("escola_id", escola);
+
+  if (acesso === "secretaria") {
+    router.push("/menu");
+  }
+
+  else if (acesso === "funcionario") {
+    router.push("/menu");
+  }
+
+
+
+
+    } else {
+      setErro("Senha incorreta ou escola não encontrada.");
     }
-  };
+
+  } catch (error) {
+    setErro("Erro ao realizar login.");
+  }
+};
 
   return (
     <div className={styles.page}>

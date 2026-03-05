@@ -18,17 +18,20 @@ module.exports = {
       const sql = `SELECT * FROM usuarios WHERE escola_id = ? AND usuario_senha = ?`;
       const values = [escola_id, senha];
             const usuarios = await db.query(sql, values);
-            if (usuarios[0].length === 0) {
-                return response.status(401).json({
-                    sucesso: false,
-                    mensagem: "Usuário ou senha inválidos.",
-                });
-            }
-            return response.status(200).json({
-                sucesso: true,
-                mensagem: "Login bem-sucedido.",
-                dados: usuarios[0],
-            });
+if (usuarios[0].length === 0) {
+    return response.status(401).json({
+        sucesso: false,
+        mensagem: "Usuário ou senha inválidos.",
+    });
+}
+
+const usuario = usuarios[0][0];
+
+return response.status(200).json({
+    sucesso: true,
+    mensagem: "Login bem-sucedido.",
+    acesso: usuario.tipo_acesso
+});
     } catch (error) {
       return response.status(500).json({
         sucesso: false,
@@ -42,7 +45,7 @@ module.exports = {
         try {
             //Instruções SQL
             const sql = `Select
-            usuario_id, escola_id, usuario_senha, data_criacao
+            usuario_id, escola_id, usuario_senha, data_criacao, tipo_acesso
             FROM usuarios;`;
             const usuarios = await db.query(sql);
             return response.status(200).json({
