@@ -1,110 +1,77 @@
-"use client";
+  "use client";
 
-import { useState } from "react";
-import axios from "axios";
+  import { useState } from "react";
+  import axios from "axios";
 
-export default function FuncionariosPage() {
+  export default function FuncionariosPage() {
 
-  const [form, setForm] = useState({
-    nome: '',
-    chegada: '',
-    almoco_saida: '',
-    almoco_retorno: '',
-    saida: ''
-  });
+    const [nome, setNome] = useState("");
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+    async function registrarPonto(tipo) {
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+      if (!nome) {
+        alert("Digite o nome do funcionário");
+        return;
+      }
 
-    try {
-      const escola_id = localStorage.getItem("escola_id");
+      try {
 
-      // substitui strings vazias por null, se quiser
-      const payload = {
-        ...form,
-        escola_id,
-        chegada: form.chegada || null,
-        almoco_saida: form.almoco_saida || null,
-        almoco_retorno: form.almoco_retorno || null,
-        saida: form.saida || null
-      };
+        const escola_id = localStorage.getItem("escola_id");
 
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/funcionarios`, payload);
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/funcionarios/ponto`,
+          {
+            nome,
+            tipo,
+            escola_id
+          }
+        );
 
-      alert("Registro salvo!");
+        alert("Ponto registrado!");
 
-      setForm({
-        nome: "",
-        chegada: "",
-        almoco_saida: "",
-        almoco_retorno: "",
-        saida: ""
-      });
-
-    } catch (error) {
-      console.error(error);
-      alert("Erro ao salvar registro.");
+      } catch (error) {
+        console.error(error);
+        alert("Erro ao registrar ponto.");
+      }
     }
-  };
 
-  return (
-    <div style={{ maxWidth: 400, margin: '0 auto', padding: 20 }}>
-      <h2>Registro de Funcionários</h2>
+    return (
+      <div style={{ maxWidth: 400, margin: "0 auto", padding: 20 }}>
+        <h2>Registro de Ponto</h2>
 
-      <form onSubmit={handleSubmit}>
-
-        <label>Nome:<br />
+        <label>
+          Nome:<br />
           <input
-            name="nome"
-            value={form.nome}
-            onChange={handleChange}
-            placeholder="Digite o nome (opcional)"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            placeholder="Digite o nome"
           />
-        </label><br /><br />
+        </label>
 
-        <label>Chegada:<br />
-          <input
-            type="time"
-            name="chegada"
-            value={form.chegada}
-            onChange={handleChange}
-          />
-        </label><br /><br />
+        <br /><br />
 
-        <label>Saída para almoço:<br />
-          <input
-            type="time"
-            name="almoco_saida"
-            value={form.almoco_saida}
-            onChange={handleChange}
-          />
-        </label><br /><br />
+        <button onClick={() => registrarPonto("chegada")}>
+          Registrar Chegada
+        </button>
 
-        <label>Retorno do almoço:<br />
-          <input
-            type="time"
-            name="almoco_retorno"
-            value={form.almoco_retorno}
-            onChange={handleChange}
-          />
-        </label><br /><br />
+        <br /><br />
 
-        <label>Saída:<br />
-          <input
-            type="time"
-            name="saida"
-            value={form.saida}
-            onChange={handleChange}
-          />
-        </label><br /><br />
+        <button onClick={() => registrarPonto("almoco_saida")}>
+          Saída para almoço
+        </button>
 
-        <button type="submit">Salvar Registro</button>
+        <br /><br />
 
-      </form>
-    </div>
-  );
-}
+        <button onClick={() => registrarPonto("almoco_retorno")}>
+          Retorno do almoço
+        </button>
+
+        <br /><br />
+
+        <button onClick={() => registrarPonto("saida")}>
+          Registrar Saída
+        </button>
+
+      </div>
+    );
+  }
