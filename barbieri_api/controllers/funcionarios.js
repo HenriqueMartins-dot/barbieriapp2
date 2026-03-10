@@ -30,11 +30,11 @@ async cadastrarFuncionario(request, response) {
 
     console.log(request.body); // 👈 ver o que está chegando
 
-    const { escola_id, nome, chegada, almoco_saida, almoco_retorno, saida } = request.body;
+    const { escola_id, nome, chegada, almoco_saida, almoco_retorno, saida, observacao, posicao } = request.body;
     const sql = `
         INSERT INTO funcionarios
-        (escola_id, nome, chegada, almoco_saida, almoco_retorno, saida, posicao)
-        VALUES (?, ?, ?, ?, ?, ?, ?);
+        (escola_id, nome, chegada, almoco_saida, almoco_retorno, saida, posicao, observacao)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
     `;
 
     const values = [
@@ -45,6 +45,7 @@ async cadastrarFuncionario(request, response) {
         almoco_retorno,
         saida,
         posicao, // 👈 posicao inicialmente nula
+        observacao, // 👈 observacao inicialmente nula
     ];
 
     const [result] = await db.query(sql, values);
@@ -70,15 +71,15 @@ async editarFuncionario(request, response) {
     try {
 
         const { id } = request.params;
-        const { nome, chegada, almoco_saida, almoco_retorno, saida } = request.body;
+        const { nome, chegada, almoco_saida, almoco_retorno, saida, posicao, observacao } = request.body;
 
         const sql = `
             UPDATE funcionarios
-            SET nome = ?, chegada = ?, almoco_saida = ?, almoco_retorno = ?, saida = ?, posicao = ?
+            SET nome = ?, chegada = ?, almoco_saida = ?, almoco_retorno = ?, saida = ?, posicao = ?, observacao = ?
             WHERE id = ?;
         `;
 
-        const values = [nome, chegada, almoco_saida, almoco_retorno, saida, id, posicao];
+        const values = [nome, chegada, almoco_saida, almoco_retorno, saida, posicao, observacao, id];
 
         const [result] = await db.query(sql, values);
 
@@ -121,11 +122,42 @@ async editarFuncionario(request, response) {
         }
     },
 
+    async atualizarObservacao(request, response) {
+
+  try {
+
+    const { id } = request.params;
+    const { observacao } = request.body;
+
+    const sql = `
+      UPDATE funcionarios
+      SET observacao = ?
+      WHERE id = ?
+    `;
+
+    await db.query(sql, [observacao, id]);
+
+    return response.status(200).json({
+      sucesso: true
+    });
+
+  } catch (error) {
+
+    return response.status(500).json({
+      sucesso: false,
+      message: error.message
+    });
+
+  }
+
+},
+
 async registrarPonto(request, response) {
 
   try {
 
-    const { escola_id, nome, tipo, posicao } = request.body;
+const { escola_id, nome, tipo, posicao, observacao } = request.body;
+
 
     if (!escola_id || !nome || !tipo) {
       return response.status(400).json({
@@ -154,11 +186,11 @@ async registrarPonto(request, response) {
       }
 
       const sqlInsert = `
-        INSERT INTO funcionarios (escola_id, nome, posicao, chegada)
-        VALUES (?, ?, ?, NOW())
+        INSERT INTO funcionarios (escola_id, nome, posicao, chegada, observacao)
+VALUES (?, ?, ?, NOW(), ?)
       `;
 
-      await db.query(sqlInsert, [escola_id, nome, posicao]);
+      await db.query(sqlInsert, [escola_id, nome, posicao, observacao]);
 
     } else {
 

@@ -42,6 +42,7 @@ router.post('/funcionarios', FuncionariosController.cadastrarFuncionario);
 router.patch('/funcionarios/:id', FuncionariosController.editarFuncionario);
 router.delete('/funcionarios/:id', FuncionariosController.apagarFuncionario);
 router.post("/funcionarios/ponto", FuncionariosController.registrarPonto);
+router.put('/funcionarios/observacao/:id', FuncionariosController.atualizarObservacao)
 
 
 

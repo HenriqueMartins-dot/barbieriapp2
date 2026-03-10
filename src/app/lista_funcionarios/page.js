@@ -8,7 +8,8 @@ export default function ListaFuncionarios() {
 
   const [filtros, setFiltros] = useState({
     nome: "",
-    posicao: ""
+    posicao: "",
+    data: ""
   })
 
   useEffect(() => {
@@ -32,6 +33,29 @@ export default function ListaFuncionarios() {
       minute: "2-digit"
     })
   }
+
+async function atualizarObservacao(id, observacao) {
+
+  try {
+
+    await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/funcionarios/observacao/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ observacao })
+      }
+    )
+
+    carregarFuncionarios() // atualiza a tabela
+
+  } catch (erro) {
+    console.error("Erro ao atualizar observação:", erro)
+  }
+
+}
 
   async function carregarFuncionarios() {
 
@@ -87,87 +111,104 @@ const funcionariosFiltrados = funcionarios.filter((f) => {
     ? (f.posicao || "").toLowerCase().includes(filtros.posicao.toLowerCase())
     : true
 
-  const algumFiltro = filtros.nome || filtros.posicao
+  const dataOk = filtros.data
+    ? new Date(f.data_registro).toISOString().slice(0,10) === filtros.data
+    : true
 
-  return algumFiltro && nomeOk && posicaoOk
+  const algumFiltro = filtros.nome || filtros.posicao || filtros.data
+
+  return algumFiltro && nomeOk && posicaoOk && dataOk
 })
   return (
     <div style={{ padding: "20px" }}>
       <h1>Lista de Funcionários</h1>
 
-      <div style={{ marginBottom: 20 }}>
+<div style={{ marginBottom: 20 }}>
 
-        <input
-          type="text"
-          name="nome"
-          placeholder="Filtrar por nome"
-          value={filtros.nome}
-          onChange={handleFiltroChange}
-          style={{ marginRight: 10 }}
-        />
+  <input
+    type="text"
+    name="nome"
+    placeholder="Filtrar por nome"
+    value={filtros.nome}
+    onChange={handleFiltroChange}
+    style={{ marginRight: 10 }}
+  />
 
-        <input
-          type="text"
-          name="posicao"
-          placeholder="Filtrar por posição"
-          value={filtros.posicao}
-          onChange={handleFiltroChange}
-        />
+  <input
+    type="text"
+    name="posicao"
+    placeholder="Filtrar por posição"
+    value={filtros.posicao}
+    onChange={handleFiltroChange}
+    style={{ marginRight: 10 }}
+  />
 
-      </div>
+  <input
+    type="date"
+    name="data"
+    value={filtros.data}
+    onChange={handleFiltroChange}
+  />
 
+</div>
       <table border="1" cellPadding="10">
 
         <thead>
-          <tr>
+<tr>
+  <th>Funcionário</th>
+  <th>Posição</th>
 
-            <th>Funcionário</th>
-            <th>Posição</th>
+  <th>Chegada</th>
+  <th>Saída Almoço</th>
+  <th>Retorno Almoço</th>
+  <th>Saída</th>
 
-            <th>Chegada</th>
-            <th>Saída Almoço</th>
-            <th>Retorno Almoço</th>
-            <th>Saída</th>
+  <th>Data</th>
+  <th>Hora Registro</th>
 
-            <th>Data</th>
-            <th>Hora Registro</th>
+  <th>Observação</th>
 
-            <th>Ação</th>
-
-          </tr>
+  <th>Ação</th>
+</tr>
         </thead>
 
         <tbody>
 
           {funcionariosFiltrados.length === 0 ? (
             <tr>
-              <td colSpan="9">Digite algo no filtro para buscar</td>
+              <td colSpan="10">Digite algo no filtro para buscar</td>
             </tr>
           ) : (
 
             funcionariosFiltrados.map((f) => (
 
-              <tr key={f.id}>
+<tr key={f.id}>
 
-                <td>{f.nome}</td>
-                <td>{f.posicao || "-"}</td>
+  <td>{f.nome}</td>
+  <td>{f.posicao || "-"}</td>
 
-                <td>{formatarHora(f.chegada)}</td>
-                <td>{formatarHora(f.almoco_saida)}</td>
-                <td>{formatarHora(f.almoco_retorno)}</td>
-                <td>{formatarHora(f.saida)}</td>
+  <td>{formatarHora(f.chegada)}</td>
+  <td>{formatarHora(f.almoco_saida)}</td>
+  <td>{formatarHora(f.almoco_retorno)}</td>
+  <td>{formatarHora(f.saida)}</td>
 
-                <td>{formatarData(f.data_registro)}</td>
-                <td>{formatarHoraData(f.data_registro)}</td>
+  <td>{formatarData(f.data_registro)}</td>
+  <td>{formatarHoraData(f.data_registro)}</td>
 
-                <td>
-                  <button onClick={() => apagarFuncionario(f.id)}>
-                    Apagar
-                  </button>
-                </td>
+<td>
+  <input
+    defaultValue={f.observacao || ""}
+    onBlur={(e) => atualizarObservacao(f.id, e.target.value)}
+    placeholder="Adicionar observação"
+  />
+</td>
+  <td>
+    <button onClick={() => apagarFuncionario(f.id)}>
+      Apagar
+    </button>
+  </td>
 
-              </tr>
-
+</tr>
             ))
 
           )}

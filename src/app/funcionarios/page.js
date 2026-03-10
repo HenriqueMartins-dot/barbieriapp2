@@ -7,6 +7,7 @@ export default function FuncionariosPage() {
 
   const [nome, setNome] = useState("");
   const [posicao, setPosicao] = useState("");
+  const [observacao, setObservacao] = useState("");
 
   async function registrarPonto(tipo) {
 
@@ -29,6 +30,7 @@ export default function FuncionariosPage() {
         {
           nome,
           posicao,
+          observacao,
           tipo,
           escola_id
         }
@@ -41,6 +43,24 @@ export default function FuncionariosPage() {
       alert("Erro ao registrar ponto.");
     }
   }
+
+  async function atualizarObservacao(id, observacao) {
+
+  try {
+
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/funcionarios/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ observacao })
+    })
+
+  } catch (erro) {
+    console.error("Erro ao atualizar observação:", erro)
+  }
+
+}
 
   return (
     <div style={{ maxWidth: 400, margin: "0 auto", padding: 20 }}>
@@ -62,6 +82,17 @@ export default function FuncionariosPage() {
         <input
           value={posicao}
           onChange={(e) => setPosicao(e.target.value)}
+        />
+      </label>
+
+      <br /><br />
+
+      <label>
+        Observação:<br />
+        <input
+          value={observacao}
+          onChange={(e) => setObservacao(e.target.value)}
+          placeholder="Digite uma observação"
         />
       </label>
 
