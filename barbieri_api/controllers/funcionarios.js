@@ -33,8 +33,8 @@ async cadastrarFuncionario(request, response) {
     const { escola_id, nome, chegada, almoco_saida, almoco_retorno, saida } = request.body;
     const sql = `
         INSERT INTO funcionarios
-        (escola_id, nome, chegada, almoco_saida, almoco_retorno, saida)
-        VALUES (?, ?, ?, ?, ?, ?);
+        (escola_id, nome, chegada, almoco_saida, almoco_retorno, saida, posicao)
+        VALUES (?, ?, ?, ?, ?, ?, ?);
     `;
 
     const values = [
@@ -43,7 +43,8 @@ async cadastrarFuncionario(request, response) {
         chegada,
         almoco_saida,
         almoco_retorno,
-        saida
+        saida,
+        posicao, // 👈 posicao inicialmente nula
     ];
 
     const [result] = await db.query(sql, values);
@@ -73,11 +74,11 @@ async editarFuncionario(request, response) {
 
         const sql = `
             UPDATE funcionarios
-            SET nome = ?, chegada = ?, almoco_saida = ?, almoco_retorno = ?, saida = ?
+            SET nome = ?, chegada = ?, almoco_saida = ?, almoco_retorno = ?, saida = ?, posicao = ?
             WHERE id = ?;
         `;
 
-        const values = [nome, chegada, almoco_saida, almoco_retorno, saida, id];
+        const values = [nome, chegada, almoco_saida, almoco_retorno, saida, id, posicao];
 
         const [result] = await db.query(sql, values);
 
@@ -120,11 +121,11 @@ async editarFuncionario(request, response) {
         }
     },
 
-    async registrarPonto(request, response) {
+async registrarPonto(request, response) {
 
   try {
 
-    const { escola_id, nome, tipo } = request.body;
+    const { escola_id, nome, tipo, posicao } = request.body;
 
     if (!escola_id || !nome || !tipo) {
       return response.status(400).json({
@@ -133,7 +134,6 @@ async editarFuncionario(request, response) {
       });
     }
 
-    // verifica se já existe registro hoje
     const sqlBusca = `
       SELECT * FROM funcionarios
       WHERE escola_id = ?
@@ -146,7 +146,6 @@ async editarFuncionario(request, response) {
 
     if (rows.length === 0) {
 
-      // cria registro novo com chegada
       if (tipo !== "chegada") {
         return response.status(400).json({
           sucesso: false,
@@ -155,11 +154,11 @@ async editarFuncionario(request, response) {
       }
 
       const sqlInsert = `
-        INSERT INTO funcionarios (escola_id, nome, chegada)
-        VALUES (?, ?, NOW())
+        INSERT INTO funcionarios (escola_id, nome, posicao, chegada)
+        VALUES (?, ?, ?, NOW())
       `;
 
-      await db.query(sqlInsert, [escola_id, nome]);
+      await db.query(sqlInsert, [escola_id, nome, posicao]);
 
     } else {
 
@@ -203,6 +202,7 @@ async editarFuncionario(request, response) {
     });
 
   }
+
 
 }
 
