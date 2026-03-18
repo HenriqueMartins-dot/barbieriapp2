@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 export default function ListaFuncionarios() {
 
   const [funcionarios, setFuncionarios] = useState([])
+  const [selecionados, setSelecionados] = useState([])
 
   const [filtros, setFiltros] = useState({
     nome: "",
@@ -34,41 +35,105 @@ export default function ListaFuncionarios() {
     })
   }
 
-async function atualizarObservacao(id, observacao) {
-
-  try {
-
-    await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/funcionarios/observacao/${id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ observacao })
-      }
-    )
-
-    carregarFuncionarios() // atualiza a tabela
-
-  } catch (erro) {
-    console.error("Erro ao atualizar observação:", erro)
+  function toggleSelecionado(id) {
+    if (selecionados.includes(id)) {
+      setSelecionados(selecionados.filter((s) => s !== id))
+    } else {
+      setSelecionados([...selecionados, id])
+    }
   }
 
+  function selecionarTodos() {
+    const todosIds = funcionariosFiltrados.map((f) => f.id)
+
+    if (selecionados.length === todosIds.length) {
+      setSelecionados([])
+    } else {
+      setSelecionados(todosIds)
+    }
+  }
+
+function imprimirSelecionados() {
+
+  if (selecionados.length === 0) {
+    alert("Selecione pelo menos um funcionário")
+    return
+  }
+
+  const conteudo = document.getElementById("area-impressao").innerHTML
+
+  const janela = window.open("", "", "width=800,height=600")
+
+  janela.document.write(`
+    <html>
+      <head>
+        <title>Impressão</title>
+        <style>
+          body {
+            font-family: Arial;
+            padding: 20px;
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+          }
+
+          th {
+            background: #eee;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>Relatório de Funcionários</h2>
+        ${conteudo}
+      </body>
+    </html>
+  `)
+
+  janela.document.close()
+  janela.focus()
+
+  setTimeout(() => {
+    janela.print()
+    janela.close()
+  }, 500)
 }
+  async function atualizarObservacao(id, observacao) {
+    try {
+      await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/funcionarios/observacao/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ observacao })
+        }
+      )
+
+      carregarFuncionarios()
+
+    } catch (erro) {
+      console.error("Erro ao atualizar observação:", erro)
+    }
+  }
 
   async function carregarFuncionarios() {
-
     const escola_id = localStorage.getItem("escola_id")
 
     try {
-
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/funcionarios?escola_id=${escola_id}`
       )
 
       const data = await res.json()
-
       setFuncionarios(data.dados)
 
     } catch (erro) {
@@ -77,12 +142,10 @@ async function atualizarObservacao(id, observacao) {
   }
 
   async function apagarFuncionario(id) {
-
     const confirmar = confirm("Deseja apagar este registro?")
     if (!confirmar) return
 
     try {
-
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/funcionarios/${id}`, {
         method: "DELETE"
       })
@@ -101,7 +164,8 @@ async function atualizarObservacao(id, observacao) {
     })
   }
 
-const funcionariosFiltrados = funcionarios.filter((f) => {
+  // ✅ FILTRO CORRIGIDO
+  const funcionariosFiltrados = funcionarios.filter((f) => {
 
   const nomeOk = filtros.nome
     ? f.nome.toLowerCase().includes(filtros.nome.toLowerCase())
@@ -119,103 +183,126 @@ const funcionariosFiltrados = funcionarios.filter((f) => {
 
   return algumFiltro && nomeOk && posicaoOk && dataOk
 })
+
+  // ✅ SOMENTE OS SELECIONADOS
+  const funcionariosParaImpressao =
+    selecionados.length > 0
+      ? funcionariosFiltrados.filter((f) => selecionados.includes(f.id))
+      : funcionariosFiltrados
+
   return (
     <div style={{ padding: "20px" }}>
+
       <h1>Lista de Funcionários</h1>
 
-<div style={{ marginBottom: 20 }}>
+      <div className="no-print">
 
-  <input
-    type="text"
-    name="nome"
-    placeholder="Filtrar por nome"
-    value={filtros.nome}
-    onChange={handleFiltroChange}
-    style={{ marginRight: 10 }}
-  />
+        <button onClick={selecionarTodos} style={{ marginRight: 10 }}>
+          Selecionar Todos
+        </button>
 
-  <input
-    type="text"
-    name="posicao"
-    placeholder="Filtrar por posição"
-    value={filtros.posicao}
-    onChange={handleFiltroChange}
-    style={{ marginRight: 10 }}
-  />
+        <button onClick={imprimirSelecionados}>
+          Imprimir Selecionados
+        </button>
 
-  <input
-    type="date"
-    name="data"
-    value={filtros.data}
-    onChange={handleFiltroChange}
-  />
+        <div style={{ marginTop: 20 }}>
 
-</div>
-      <table border="1" cellPadding="10">
+          <input
+            type="text"
+            name="nome"
+            placeholder="Filtrar por nome"
+            value={filtros.nome}
+            onChange={handleFiltroChange}
+            style={{ marginRight: 10 }}
+          />
 
-        <thead>
-<tr>
-  <th>Funcionário</th>
-  <th>Posição</th>
+          <input
+            type="text"
+            name="posicao"
+            placeholder="Filtrar por posição"
+            value={filtros.posicao}
+            onChange={handleFiltroChange}
+            style={{ marginRight: 10 }}
+          />
 
-  <th>Chegada</th>
-  <th>Saída Almoço</th>
-  <th>Retorno Almoço</th>
-  <th>Saída</th>
+          <input
+            type="date"
+            name="data"
+            value={filtros.data}
+            onChange={handleFiltroChange}
+          />
 
-  <th>Data</th>
-  <th>Hora Registro</th>
+        </div>
 
-  <th>Observação</th>
+      </div>
 
-  <th>Ação</th>
-</tr>
-        </thead>
+      {/* ✅ ÁREA DE IMPRESSÃO */}
+      <div id="area-impressao">
 
-        <tbody>
+        <table border="1" cellPadding="10">
 
-          {funcionariosFiltrados.length === 0 ? (
+          <thead>
             <tr>
-              <td colSpan="10">Digite algo no filtro para buscar</td>
+              <th className="no-print"></th>
+              <th>Funcionário</th>
+              <th>Posição</th>
+              <th>Chegada</th>
+              <th>Saída Almoço</th>
+              <th>Retorno Almoço</th>
+              <th>Saída</th>
+              <th>Data</th>
+              <th>Hora Registro</th>
+              <th>Observação</th>
+              <th className="no-print">Ação</th>
             </tr>
-          ) : (
+          </thead>
 
-            funcionariosFiltrados.map((f) => (
+          <tbody>
 
-<tr key={f.id}>
+            {funcionariosParaImpressao.map((f) => (
 
-  <td>{f.nome}</td>
-  <td>{f.posicao || "-"}</td>
+              <tr key={f.id}>
 
-  <td>{formatarHora(f.chegada)}</td>
-  <td>{formatarHora(f.almoco_saida)}</td>
-  <td>{formatarHora(f.almoco_retorno)}</td>
-  <td>{formatarHora(f.saida)}</td>
+                <td className="no-print">
+                  <input
+                    type="checkbox"
+                    checked={selecionados.includes(f.id)}
+                    onChange={() => toggleSelecionado(f.id)}
+                  />
+                </td>
 
-  <td>{formatarData(f.data_registro)}</td>
-  <td>{formatarHoraData(f.data_registro)}</td>
+                <td>{f.nome}</td>
+                <td>{f.posicao || "-"}</td>
 
-<td>
-  <input
-    defaultValue={f.observacao || ""}
-    onBlur={(e) => atualizarObservacao(f.id, e.target.value)}
-    placeholder="Adicionar observação"
-  />
-</td>
-  <td>
-    <button onClick={() => apagarFuncionario(f.id)}>
-      Apagar
-    </button>
-  </td>
+                <td>{formatarHora(f.chegada)}</td>
+                <td>{formatarHora(f.almoco_saida)}</td>
+                <td>{formatarHora(f.almoco_retorno)}</td>
+                <td>{formatarHora(f.saida)}</td>
 
-</tr>
-            ))
+                <td>{formatarData(f.data_registro)}</td>
+                <td>{formatarHoraData(f.data_registro)}</td>
 
-          )}
+                <td>
+                  <input
+                    defaultValue={f.observacao || ""}
+                    onBlur={(e) => atualizarObservacao(f.id, e.target.value)}
+                  />
+                </td>
 
-        </tbody>
+                <td className="no-print">
+                  <button onClick={() => apagarFuncionario(f.id)}>
+                    Apagar
+                  </button>
+                </td>
 
-      </table>
+              </tr>
+            ))}
+
+          </tbody>
+
+        </table>
+
+      </div>
 
     </div>
   )
