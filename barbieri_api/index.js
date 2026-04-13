@@ -18,8 +18,9 @@ app.get('/status', (req, res) => {
   res.json({ message: 'API funcionando corretamente' });
 });
 
+
 // Defina a porta
-const porta = 3333;
+const porta = 3000;
 
 app.listen(porta, '0.0.0.0', () => {
     console.log(`Servidor iniciado na porta ${porta}`);
