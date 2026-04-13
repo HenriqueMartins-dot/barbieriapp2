@@ -4,14 +4,17 @@ const db = require('../database/connection');
 module.exports = {
     async listarEscolas(request, response) {
         try {
+            console.log('listarEscolas: Iniciando consulta SQL...');
             const sql = 'SELECT * FROM escolas';
             const escolas = await db.query(sql);
+            console.log('listarEscolas: Consulta SQL finalizada. Resultado:', escolas[0]);
             return response.status(200).json({
                 sucesso: true,
                 mensagem: 'Lista de escolas.',
                 dados: escolas[0]
             });
         } catch (error) {
+            console.error('listarEscolas: Erro na consulta SQL:', error);
             return response.status(500).json({
                 sucesso: false,
                 mensagem: 'Erro na requisição.',
