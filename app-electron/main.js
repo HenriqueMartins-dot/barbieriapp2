@@ -29,7 +29,7 @@ function createWindow() {
   });
 
   server = http.createServer(staticApp);
-  server.listen(3001, () => {
+  server.listen(3000, () => {
     mainWindow = new BrowserWindow({
       width: 1200,
       height: 800,
@@ -37,7 +37,7 @@ function createWindow() {
         nodeIntegration: false
       }
     });
-    mainWindow.loadURL('http://localhost:3001');
+    mainWindow.loadURL('http://localhost:3000');
     mainWindow.on("closed", () => {
       if (server) server.close();
       if (apiProcess) apiProcess.kill();
