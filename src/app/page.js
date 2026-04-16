@@ -13,12 +13,15 @@ export default function Home() {
   const [escola, setEscola] = useState("");
   const [escolas, setEscolas] = useState([]);
   const [erro, setErro] = useState("");
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
   // Carregar lista de escolas do banco
   useEffect(() => {
     const fetchEscolas = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/escolas`);
+        const apiUrl = `${API_BASE_URL}/escolas`;
+        console.log("Fetching escolas from:", apiUrl);
+        const response = await axios.get(apiUrl);
         console.log(response.data);  // Verifique a resposta da API
         setEscolas(response.data.dados); // Assumindo que a resposta contém o campo `dados` com as escolas
       } catch (error) {
@@ -39,7 +42,7 @@ const handleLogin = async () => {
 
   try {
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/usuarios/login`,
+      `${API_BASE_URL}/usuarios/login`,
       {
         escola_id: escola,
         senha: senha,
