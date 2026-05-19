@@ -1,13 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../../lib/api";
 
 export default function FuncionariosPage() {
 
   const [nome, setNome] = useState("");
   const [posicao, setPosicao] = useState("");
   const [observacao, setObservacao] = useState("");
+  const [acesso, setAcesso] = useState("");
+
+  useEffect(() => {
+    setAcesso(localStorage.getItem("acesso") || "");
+  }, []);
 
   async function registrarPonto(tipo) {
 
@@ -25,16 +31,15 @@ export default function FuncionariosPage() {
 
       const escola_id = localStorage.getItem("escola_id");
 
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/funcionarios/ponto`,
-        {
-          nome,
-          posicao,
-          observacao,
-          tipo,
-          escola_id
-        }
-      );
+      const payload = {
+        nome,
+        posicao,
+        observacao: acesso === "secretaria" ? observacao : null,
+        tipo,
+        escola_id
+      };
+
+      await axios.post(`${API_BASE_URL}/funcionarios/ponto`, payload);
 
       alert("Ponto registrado!");
 
@@ -46,21 +51,21 @@ export default function FuncionariosPage() {
 
   async function atualizarObservacao(id, observacao) {
 
-  try {
+    try {
 
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/funcionarios/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ observacao })
-    })
+      await fetch(`${API_BASE_URL}/funcionarios/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ observacao })
+      })
 
-  } catch (erro) {
-    console.error("Erro ao atualizar observação:", erro)
+    } catch (erro) {
+      console.error("Erro ao atualizar observação:", erro)
+    }
+
   }
-
-}
 
   return (
     <div style={{ maxWidth: 400, margin: "0 auto", padding: 20 }}>
@@ -87,16 +92,20 @@ export default function FuncionariosPage() {
 
       <br /><br />
 
-      <label>
-        Observação:<br />
-        <input
-          value={observacao}
-          onChange={(e) => setObservacao(e.target.value)}
-          placeholder="Digite uma observação"
-        />
-      </label>
+      {acesso === "secretaria" && (
+        <>
+          <label>
+            Observação:<br />
+            <input
+              value={observacao}
+              onChange={(e) => setObservacao(e.target.value)}
+              placeholder="Digite uma observação"
+            />
+          </label>
 
-      <br /><br />
+          <br /><br />
+        </>
+      )}
 
       <button onClick={() => registrarPonto("chegada")}>
         Registrar Chegada

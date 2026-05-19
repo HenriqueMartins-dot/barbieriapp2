@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import styles from "./page.module.css";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { API_BASE_URL } from "../lib/api";
 
 export default function Home() {
   const router = useRouter();
@@ -13,7 +14,6 @@ export default function Home() {
   const [escola, setEscola] = useState("");
   const [escolas, setEscolas] = useState([]);
   const [erro, setErro] = useState("");
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
   // Carregar lista de escolas do banco
   useEffect(() => {
@@ -120,3 +120,4 @@ if (response.data.sucesso) {
     </div>
   );
 }
+

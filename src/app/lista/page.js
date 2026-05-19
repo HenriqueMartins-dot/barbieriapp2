@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { API_BASE_URL } from "../../lib/api";
 import styles from "./page.module.css";
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import BoletimPDF from '../../../components/pdf/boletimPDF';
@@ -71,7 +72,7 @@ export default function ListaAlunos() {
   useEffect(() => {
     const fetchAlunos = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/alunos`);
+        const response = await axios.get(`${API_BASE_URL}/alunos`);
         setAlunos(response.data.dados);
       } catch (error) {
         console.error("Erro ao buscar alunos:", error);
@@ -145,12 +146,12 @@ const todosSelecionados = alunosFiltrados.length > 0 && alunosFiltrados.every(al
       console.log("ID enviado para deletar:", aluno.id);
 
       // Deletando o aluno baseado no id
-      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/alunos/${aluno.id}`);
+      await axios.delete(`${API_BASE_URL}/alunos/${aluno.id}`);
 
       alert("Aluno excluído com sucesso!");
 
       // Buscar novamente a lista do backend para garantir a atualização correta
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/alunos`);
+      const response = await axios.get(`${API_BASE_URL}/alunos`);
       setAlunos(response.data.dados);
     } catch (error) {
       console.error("Erro ao excluir aluno:", error);
@@ -169,14 +170,14 @@ const verNotas = async (aluno) => {
   console.log("=== VER NOTAS ===");
   console.log("Aluno:", aluno);
   console.log("ID do aluno:", aluno.id);
-  console.log("URL da API:", `${process.env.NEXT_PUBLIC_API_URL}/notas/${aluno.id}`);
+  console.log("URL da API:", `${API_BASE_URL}/notas/${aluno.id}`);
   
   setAlunoSelecionado(aluno);
   setModalVerNotasAberto(true);
   
   // Busca as notas mais recentes do aluno
   try {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/notas/${aluno.id}`);
+    const response = await axios.get(`${API_BASE_URL}/notas/${aluno.id}`);
     console.log("Resposta da API:", response.data);
 
     if (response.data.sucesso) {
@@ -214,7 +215,7 @@ const verNotas = async (aluno) => {
         return;
       }
 
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/notas/${aluno.id}`);
+      const response = await axios.get(`${API_BASE_URL}/notas/${aluno.id}`);
 
       if (response.data.sucesso && response.data.dados.length > 0) {
         const nota = response.data.dados[0];
@@ -284,12 +285,12 @@ const verNotas = async (aluno) => {
     }
 
     try {
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/notas/${alunoSelecionado.id}`, notasEditando);
+      await axios.patch(`${API_BASE_URL}/notas/${alunoSelecionado.id}`, notasEditando);
       alert("Notas editadas com sucesso!");
 
       // Atualiza as notas no estado notasDoAluno para refletir as mudanças
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/notas/${alunoSelecionado.id}`);
+        const response = await axios.get(`${API_BASE_URL}/notas/${alunoSelecionado.id}`);
         if (response.data.sucesso) {
           const notasRecebidas = response.data.dados || [];
           setNotasDoAluno(prev => ({ ...prev, [alunoSelecionado.id]: notasRecebidas }));
@@ -353,13 +354,13 @@ const verNotas = async (aluno) => {
       };
 
       // Enviando os dados atualizados para o backend
-      await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/alunos/${alunoSelecionado.id}`, alunoAtualizado);
+      await axios.patch(`${API_BASE_URL}/alunos/${alunoSelecionado.id}`, alunoAtualizado);
 
       alert("Informações do aluno editadas com sucesso!");
       setModalEditarAlunoAberto(false);
 
       // Recarregar a lista de alunos
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/alunos`);
+      const response = await axios.get(`${API_BASE_URL}/alunos`);
       setAlunos(response.data.dados);
     } catch (error) {
       if (error.response) {
@@ -486,7 +487,7 @@ return (
               onClick={async () => {
                 // Refresh notes for this student
                 try {
-                  const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/notas/${alunoSelecionado.id}`);
+                  const response = await axios.get(`${API_BASE_URL}/notas/${alunoSelecionado.id}`);
                   if (response.data.sucesso) {
                     const notasRecebidas = response.data.dados || [];
                     setNotasDoAluno(prev => ({ ...prev, [alunoSelecionado.id]: notasRecebidas }));
@@ -702,7 +703,7 @@ return (
                 const alunosComNotas = await Promise.all(
                   alunosValidos.map(async (aluno) => {
                     try {
-                      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/notas/${aluno.id}`);
+                      const response = await axios.get(`${API_BASE_URL}/notas/${aluno.id}`);
                       const notasLinhas = response.data?.dados || [];
 
                       // Transforma cada linha (com várias disciplinas) em entradas por disciplina
@@ -777,11 +778,11 @@ return (
               try {
                 await Promise.all(
                   alunosSelecionados.map((id) =>
-                    axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/alunos/${id}`)
+                    axios.delete(`${API_BASE_URL}/alunos/${id}`)
                   )
                 );
                 alert("Alunos excluídos com sucesso!");
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/alunos`);
+                const response = await axios.get(`${API_BASE_URL}/alunos`);
                 setAlunos(response.data.dados);
                 setAlunosSelecionados([]);
               } catch (error) {
@@ -851,7 +852,7 @@ return (
   onClick={async () => {
     try {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/notas/${aluno.id}`
+        `${API_BASE_URL}/notas/${aluno.id}`
       );
 
       const notasLinhas = response.data?.dados || [];

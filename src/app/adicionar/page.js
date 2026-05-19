@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";  // Importa o axios para as requisições API
+import { API_BASE_URL } from "../../lib/api";
 import styles from "./page.module.css";
 import debounce from "lodash/debounce";
 
@@ -109,10 +110,10 @@ const handleSalvarAno = async (e) => {
 
     console.log("Criando NOVO aluno para o ano:", anoSelecionado);
     console.log("Dados do aluno:", alunoData);
-    console.log("URL da API alunos:", `${process.env.NEXT_PUBLIC_API_URL}/alunos`);
+    console.log("URL da API alunos:", `${API_BASE_URL}/alunos`);
 
     // Cria um novo aluno para este ano
-    const alunoResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/alunos`, alunoData);
+    const alunoResponse = await axios.post(`${API_BASE_URL}/alunos`, alunoData);
     console.log("Resposta da criação do aluno:", alunoResponse.data);
     
     // A API retorna dados diretamente como ID, não como objeto
@@ -131,9 +132,9 @@ const handleSalvarAno = async (e) => {
 
     console.log("=== SALVANDO NOTAS ===");
     console.log("Dados das notas:", dadosDoAno);
-    console.log("URL da API:", `${process.env.NEXT_PUBLIC_API_URL}/notas`);
+    console.log("URL da API:", `${API_BASE_URL}/notas`);
 
-    const notasResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notas`, dadosDoAno);
+    const notasResponse = await axios.post(`${API_BASE_URL}/notas`, dadosDoAno);
     console.log("Resposta ao salvar notas:", notasResponse.data);
     
     alert(`Aluno do ${anoSelecionado}º ano criado com sucesso!`);
@@ -168,7 +169,7 @@ const handleSalvarAno = async (e) => {
 const enviarTodosOsDados = async (dados) => {
   try {
     for (const ano of dados) {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notas`, ano);
+      await axios.post(`${API_BASE_URL}/notas`, ano);
     }
     alert("Dados enviados com sucesso!");
     resetForm();
@@ -205,7 +206,7 @@ const handleSalvarAluno = async (e) => {
   };
 
   try {
-    const alunoResponse = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/alunos`, alunoData);
+    const alunoResponse = await axios.post(`${API_BASE_URL}/alunos`, alunoData);
 
     console.log("Resposta do servidor:", alunoResponse.data);
 
@@ -236,7 +237,7 @@ useEffect(() => {
 
 const handleSalvarNotas = async () => {
   try {
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/notas`, {
+    const response = await axios.post(`${API_BASE_URL}/notas`, {
       aluno_id: alunoId,
       matematica,
       portugues,
@@ -279,7 +280,7 @@ const handleSalvarNotas = async () => {
     }
 
     try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/alunos?busca=${texto}`);
+      const res = await axios.get(`${API_BASE_URL}/alunos?busca=${texto}`);
       const nomesFiltrados = res.data.dados.filter(aluno =>
         aluno.aluno_nome.toLowerCase().includes(texto.toLowerCase())
       );

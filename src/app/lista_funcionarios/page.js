@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { API_BASE_URL } from "../../lib/api"
 
 export default function ListaFuncionarios() {
 
@@ -60,43 +61,63 @@ function imprimirSelecionados() {
     return
   }
 
-  const conteudo = document.getElementById("area-impressao").innerHTML
+  const funcionariosParaImpressao = funcionariosFiltrados.filter((f) =>
+    selecionados.includes(f.id)
+  )
 
-  const janela = window.open("", "", "width=800,height=600")
+  const linhas = funcionariosParaImpressao
+    .map((f) => `
+      <tr>
+        <td>${f.nome}</td>
+        <td>${f.posicao || "-"}</td>
+        <td>${formatarHora(f.chegada)}</td>
+        <td>${formatarHora(f.almoco_saida)}</td>
+        <td>${formatarHora(f.almoco_retorno)}</td>
+        <td>${formatarHora(f.saida)}</td>
+        <td>${formatarData(f.data_registro)}</td>
+        <td>${formatarHoraData(f.data_registro)}</td>
+        <td>${f.observacao || ""}</td>
+      </tr>
+    `)
+    .join("")
 
-  janela.document.write(`
+  const html = `
     <html>
       <head>
         <title>Impressão</title>
         <style>
-          body {
-            font-family: Arial;
-            padding: 20px;
-          }
-
-          table {
-            width: 100%;
-            border-collapse: collapse;
-          }
-
-          th, td {
-            border: 1px solid #000;
-            padding: 8px;
-            text-align: left;
-          }
-
-          th {
-            background: #eee;
-          }
+          body { font-family: Arial; padding: 20px; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+          th { background: #eee; }
         </style>
       </head>
       <body>
         <h2>Relatório de Funcionários</h2>
-        ${conteudo}
+        <table>
+          <thead>
+            <tr>
+              <th>Funcionário</th>
+              <th>Posição</th>
+              <th>Chegada</th>
+              <th>Saída Almoço</th>
+              <th>Retorno Almoço</th>
+              <th>Saída</th>
+              <th>Data</th>
+              <th>Hora Registro</th>
+              <th>Observação</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${linhas}
+          </tbody>
+        </table>
       </body>
     </html>
-  `)
+  `
 
+  const janela = window.open("", "", "width=800,height=600")
+  janela.document.write(html)
   janela.document.close()
   janela.focus()
 
@@ -108,7 +129,7 @@ function imprimirSelecionados() {
   async function atualizarObservacao(id, observacao) {
     try {
       await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/funcionarios/observacao/${id}`,
+        `${API_BASE_URL}/funcionarios/observacao/${id}`,
         {
           method: "PUT",
           headers: {
@@ -130,7 +151,7 @@ function imprimirSelecionados() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/funcionarios?escola_id=${escola_id}`
+        `${API_BASE_URL}/funcionarios?escola_id=${escola_id}`
       )
 
       const data = await res.json()
@@ -146,7 +167,7 @@ function imprimirSelecionados() {
     if (!confirmar) return
 
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/funcionarios/${id}`, {
+      await fetch(`${API_BASE_URL}/funcionarios/${id}`, {
         method: "DELETE"
       })
 
@@ -164,31 +185,26 @@ function imprimirSelecionados() {
     })
   }
 
-  // ✅ FILTRO CORRIGIDO
-  const funcionariosFiltrados = funcionarios.filter((f) => {
-
-  const nomeOk = filtros.nome
-    ? f.nome.toLowerCase().includes(filtros.nome.toLowerCase())
-    : true
-
-  const posicaoOk = filtros.posicao
-    ? (f.posicao || "").toLowerCase().includes(filtros.posicao.toLowerCase())
-    : true
-
-  const dataOk = filtros.data
-    ? new Date(f.data_registro).toISOString().slice(0,10) === filtros.data
-    : true
-
   const algumFiltro = filtros.nome || filtros.posicao || filtros.data
 
-  return algumFiltro && nomeOk && posicaoOk && dataOk
-})
+  const funcionariosFiltrados = funcionarios.filter((f) => {
 
-  // ✅ SOMENTE OS SELECIONADOS
-  const funcionariosParaImpressao =
-    selecionados.length > 0
-      ? funcionariosFiltrados.filter((f) => selecionados.includes(f.id))
-      : funcionariosFiltrados
+    if (!algumFiltro) return false
+
+    const nomeOk = filtros.nome
+      ? f.nome.toLowerCase().includes(filtros.nome.toLowerCase())
+      : true
+
+    const posicaoOk = filtros.posicao
+      ? (f.posicao || "").toLowerCase().includes(filtros.posicao.toLowerCase())
+      : true
+
+    const dataOk = filtros.data
+      ? new Date(f.data_registro).toISOString().slice(0,10) === filtros.data
+      : true
+
+    return nomeOk && posicaoOk && dataOk
+  })
 
   return (
     <div style={{ padding: "20px" }}>
@@ -237,9 +253,14 @@ function imprimirSelecionados() {
       </div>
 
       {/* ✅ ÁREA DE IMPRESSÃO */}
-      <div id="area-impressao">
+      {!algumFiltro ? (
+        <p style={{ marginTop: 20 }}>
+          Digite algum filtro para mostrar a lista de funcionários.
+        </p>
+      ) : (
+        <div id="area-impressao">
 
-        <table border="1" cellPadding="10">
+          <table border="1" cellPadding="10">
 
           <thead>
             <tr>
@@ -259,7 +280,7 @@ function imprimirSelecionados() {
 
           <tbody>
 
-            {funcionariosParaImpressao.map((f) => (
+            {funcionariosFiltrados.map((f) => (
 
               <tr key={f.id}>
 
@@ -302,7 +323,8 @@ function imprimirSelecionados() {
 
         </table>
 
-      </div>
+        </div>
+      )}
 
     </div>
   )
