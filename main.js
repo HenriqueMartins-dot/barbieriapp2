@@ -26,15 +26,29 @@ app.whenReady().then(() => {
     return;
   }
 
-  nextProcess = spawn(
-    process.platform === "win32" ? "npm.cmd" : "npm",
-    ["start"],
-    {
-      cwd: app.getAppPath(),
-      shell: true
-    }
-  );
+const nextBinary = path.join(
+  app.getAppPath(),
+  "node_modules",
+  ".bin",
+  process.platform === "win32" ? "next.cmd" : "next"
+);
 
+nextProcess = spawn(
+  nextBinary,
+  ["start"],
+  {
+    cwd: app.getAppPath(),
+    shell: true
+  }
+);
+
+nextProcess.stdout.on("data", data => {
+  console.log(data.toString());
+});
+
+nextProcess.stderr.on("data", data => {
+  console.log(data.toString());
+});
   setTimeout(() => {
     createWindow();
   }, 8000);
