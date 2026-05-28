@@ -2,16 +2,20 @@ const { app, BrowserWindow } = require("electron");
 const { spawn } = require("child_process");
 const path = require("path");
 
-let mainWindow;
-let nextProcess;
+let frontendProcess;
+let backendProcess;
 
 function createWindow() {
-  mainWindow = new BrowserWindow({
+  const win = new BrowserWindow({
     width: 1400,
-    height: 900
+    height: 900,
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false
+    }
   });
 
-  mainWindow.loadURL("http://localhost:3000");
+  win.loadURL("http://localhost:3000");
 }
 
 app.whenReady().then(() => {
@@ -20,34 +24,34 @@ app.whenReady().then(() => {
     return;
   }
 
-  const nextCli = path.join(
-    process.resourcesPath,
-    "app",
-    "node_modules",
-    "next",
-    "dist",
-    "bin",
-    "next"
+  const rootPath = process.resourcesPath + "/app";
+
+  backendProcess = spawn(
+    "cmd.exe",
+    ["/c", "npm", "start"],
+    {
+      cwd: path.join(rootPath, "barbieri_api"),
+      shell: true
+    }
   );
 
-  nextProcess = spawn(
-    process.execPath,
-    [nextCli, "start"],
+  frontendProcess = spawn(
+    "cmd.exe",
+    ["/c", "npm", "start"],
     {
-      cwd: process.resourcesPath + "/app",
+      cwd: rootPath,
       shell: true
     }
   );
 
   setTimeout(() => {
     createWindow();
-  }, 10000);
+  }, 12000);
 });
 
 app.on("window-all-closed", () => {
-  if (nextProcess) {
-    nextProcess.kill();
-  }
+  if (frontendProcess) frontendProcess.kill();
+  if (backendProcess) backendProcess.kill();
 
   app.quit();
 });
