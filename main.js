@@ -5,16 +5,24 @@ const path = require("path");
 let frontendProcess;
 let backendProcess;
 
+app.setName("BarbieriApp");
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1400,
     height: 900,
+    minWidth: 1100,
+    minHeight: 720,
+    backgroundColor: "#f4f8ff",
+    title: "BarbieriApp",
+    titleBarStyle: "default",
     webPreferences: {
       contextIsolation: true,
-      nodeIntegration: false
-    }
+      nodeIntegration: false,
+    },
   });
 
+  win.setMenuBarVisibility(false);
   win.loadURL("http://localhost:3000");
 }
 
@@ -26,23 +34,15 @@ app.whenReady().then(() => {
 
   const rootPath = process.resourcesPath + "/app";
 
-  backendProcess = spawn(
-    "cmd.exe",
-    ["/c", "npm", "start"],
-    {
-      cwd: path.join(rootPath, "barbieri_api"),
-      shell: true
-    }
-  );
+  backendProcess = spawn("cmd.exe", ["/c", "npm", "start"], {
+    cwd: path.join(rootPath, "barbieri_api"),
+    shell: true,
+  });
 
-  frontendProcess = spawn(
-    "cmd.exe",
-    ["/c", "npm", "start"],
-    {
-      cwd: rootPath,
-      shell: true
-    }
-  );
+  frontendProcess = spawn("cmd.exe", ["/c", "npm", "start"], {
+    cwd: rootPath,
+    shell: true,
+  });
 
   setTimeout(() => {
     createWindow();
@@ -54,4 +54,10 @@ app.on("window-all-closed", () => {
   if (backendProcess) backendProcess.kill();
 
   app.quit();
+});
+
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
 });

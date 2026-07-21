@@ -3,47 +3,98 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: #e0f2ff; /* Light blue background */
+  padding: 24px;
 }
 
 .container {
-  background: rgba(255, 255, 255, 0.9);
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: min(100%, 440px);
+  background: rgba(255, 255, 255, 0.96);
+  padding: 32px;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 45px rgba(17, 37, 61, 0.12);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  max-width: 400px;
-  width: 100%;
+  gap: 12px;
+}
+
+.logoWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.logo {
+  object-fit: contain;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin-top: 4px;
 }
 
 .label {
-  font-size: 16px;
+  font-size: 0.95rem;
   font-weight: 600;
+  color: #334155;
 }
 
-.select, .input {
+.select,
+.input {
   width: 100%;
-  padding: 10px;
-  border: 1px solid var(--gray-alpha-200);
-  border-radius: 4px;
-  font-size: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 1rem;
+  background-color: #fff;
+  color: var(--foreground);
+}
+
+.select:focus,
+.input:focus {
+  outline: 2px solid rgba(37, 99, 235, 0.18);
+  border-color: var(--accent);
 }
 
 .button {
-  background: var(--foreground);
-  color: var(--background);
-  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+  color: white;
+  padding: 12px 18px;
   border: none;
-  border-radius: 4px;
-  font-size: 16px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   width: 100%;
+  margin-top: 4px;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
 }
 
-.button:hover {
-  background: var(--button-primary-hover);
+.button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.28);
+}
+
+.button:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #b91c1c;
+  font-size: 0.95rem;
+  text-align: center;
 }
