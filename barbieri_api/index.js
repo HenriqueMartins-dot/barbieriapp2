@@ -20,7 +20,7 @@ app.get('/status', (req, res) => {
 
 
 // Defina a porta
-const porta = 3001;
+const porta = Number(process.env.API_PORT || 3001);
 
 app.listen(porta, '0.0.0.0', () => {
     console.log(`Servidor iniciado na porta ${porta}`);
