@@ -7,6 +7,8 @@ let backendProcess;
 
 app.setName("BarbieriApp");
 
+const rootPath = app.isPackaged ? process.resourcesPath + "/app" : __dirname;
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 1400,
@@ -26,23 +28,49 @@ function createWindow() {
   win.loadURL("http://localhost:3000");
 }
 
-app.whenReady().then(() => {
-  if (!app.isPackaged) {
-    createWindow();
+function startBackend() {
+  if (backendProcess) {
     return;
   }
 
-  const rootPath = process.resourcesPath + "/app";
+  const backendCommand = app.isPackaged
+    ? ["npm", "start"]
+    : ["npm", "run", "dev"];
 
-  backendProcess = spawn("cmd.exe", ["/c", "npm", "start"], {
+  backendProcess = spawn("cmd.exe", ["/c", ...backendCommand], {
     cwd: path.join(rootPath, "barbieri_api"),
     shell: true,
   });
+}
 
-  frontendProcess = spawn("cmd.exe", ["/c", "npm", "start"], {
+function startFrontend() {
+  if (frontendProcess) {
+    return;
+  }
+
+  const frontendCommand = app.isPackaged
+    ? ["npm", "start"]
+    : ["npm", "run", "dev"];
+
+  frontendProcess = spawn("cmd.exe", ["/c", ...frontendCommand], {
     cwd: rootPath,
     shell: true,
   });
+}
+
+app.whenReady().then(() => {
+  if (!app.isPackaged) {
+    startBackend();
+    startFrontend();
+
+    setTimeout(() => {
+      createWindow();
+    }, 3000);
+    return;
+  }
+
+  startBackend();
+  startFrontend();
 
   setTimeout(() => {
     createWindow();
