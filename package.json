@@ -22,7 +22,6 @@
 "build": {
   "appId": "com.barbieri.app",
   "productName": "BarbieriApp",
-  "asar": false,
   "files": [
     ".next/**/*",
     "public/**/*",

@@ -13,6 +13,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1400,
 <<<<<<< HEAD
+<<<<<<< HEAD
     height: 900,
     minWidth: 1100,
     minHeight: 720,
@@ -29,6 +30,13 @@ function createWindow() {
   win.loadURL("http://localhost:3000");
 =======
     height: 900
+=======
+    height: 900,
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+>>>>>>> parent of 815d624 (ok)
   });
 
   mainWindow.loadURL("http://localhost:3000");
@@ -66,6 +74,7 @@ function startFrontend() {
 }
 
 app.whenReady().then(() => {
+<<<<<<< HEAD
   if (!app.isPackaged) {
     startBackend();
     startFrontend();
@@ -99,10 +108,41 @@ app.whenReady().then(() => {
     }
   );
 >>>>>>> parent of b9ff1cf (ok)
+=======
+  const isDev = !app.isPackaged;
 
+  if (isDev) {
+    createWindow();
+    return;
+  }
+
+const nextBinary = path.join(
+  app.getAppPath(),
+  "node_modules",
+  ".bin",
+  process.platform === "win32" ? "next.cmd" : "next"
+);
+
+nextProcess = spawn(
+  nextBinary,
+  ["start"],
+  {
+    cwd: app.getAppPath(),
+    shell: true
+  }
+);
+>>>>>>> parent of 815d624 (ok)
+
+nextProcess.stdout.on("data", data => {
+  console.log(data.toString());
+});
+
+nextProcess.stderr.on("data", data => {
+  console.log(data.toString());
+});
   setTimeout(() => {
     createWindow();
-  }, 10000);
+  }, 8000);
 });
 
 app.on("window-all-closed", () => {
@@ -110,11 +150,16 @@ app.on("window-all-closed", () => {
     nextProcess.kill();
   }
 
+<<<<<<< HEAD
   app.quit();
 });
 
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
+=======
+  if (process.platform !== "darwin") {
+    app.quit();
+>>>>>>> parent of 815d624 (ok)
   }
 });
