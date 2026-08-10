@@ -26,13 +26,9 @@
   "files": [
     ".next/**/*",
     "public/**/*",
-    "src/**/*",
-    "barbieri_api/**/*",
-    "node_modules/**/*",
     "main.js",
     "package.json",
-    ".env",
-    ".env.local"
+    "node_modules/**/*"
   ],
   "win": {
     "target": "nsis"
