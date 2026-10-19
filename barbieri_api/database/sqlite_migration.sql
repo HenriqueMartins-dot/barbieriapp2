@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS alunos (
     matricula_primitiva TEXT,
     matricula_ano_letivo TEXT,
     ano_curso TEXT,
-    sexo TEXT,
+    sexo TEXT, 
     observacao TEXT,
     eliminacao_data TEXT,
     eliminacao_causa TEXT,
