@@ -42,10 +42,17 @@ export default function Menu() {
           )}
 
           {(acesso === "secretaria" || acesso === "funcionario") && (
-            <Link href="/funcionarios" className={styles.navCard}>
-              <span className={styles.navTitle}>Ponto</span>
-              <span className={styles.navDescription}>Registre e acompanhe o ponto do dia.</span>
-            </Link>
+            <>
+              <Link href="/funcionarios" className={styles.navCard}>
+                <span className={styles.navTitle}>Ponto</span>
+                <span className={styles.navDescription}>Registre e acompanhe o ponto do dia.</span>
+              </Link>
+
+              <Link href="/criancas" className={styles.navCard}>
+                <span className={styles.navTitle}>Quantidade de crianças</span>
+                <span className={styles.navDescription}>Registre as quantidades por sala e período.</span>
+              </Link>
+            </>
           )}
         </nav>
       </main>

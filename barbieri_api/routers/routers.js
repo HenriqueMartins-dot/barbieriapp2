@@ -7,6 +7,7 @@ const UsuariosController = require('../controllers/usuarios');
 const NotasController = require('../controllers/notas');
 const EscolasController = require('../controllers/escolas');
 const AlunosController = require('../controllers/alunos');
+const CriancasController = require('../controllers/criancas');
 
 //router usuarios
 router.get('/usuarios', UsuariosController.listarUsuario);
@@ -34,6 +35,11 @@ router.post('/alunos', AlunosController.cadastrarAlunos);
 router.patch('/alunos/:id', AlunosController.editarAlunos);
 router.delete('/alunos/:id', AlunosController.apagarAlunos);
 router.get("/buscar", AlunosController.buscarAlunos);
+
+//router contagem de crianças
+router.get('/criancas/lista', CriancasController.listarDatas);
+router.get('/criancas', CriancasController.listarContagens);
+router.put('/criancas', CriancasController.salvarContagens);
 
 //router funcionarios
 const FuncionariosController = require('../controllers/funcionarios');
