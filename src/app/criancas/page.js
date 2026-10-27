@@ -3,7 +3,9 @@
 import Link from "next/link";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { pdf } from "@react-pdf/renderer";
 import { API_BASE_URL } from "../../lib/api";
+import ContagemCriancasPDF from "../../../components/pdf/contagemCriancasPDF";
 import styles from "./page.module.css";
 
 const TOTAL_SALAS = 13;
@@ -41,6 +43,9 @@ export default function CriancasPage() {
   const [carregandoLista, setCarregandoLista] = useState(false);
   const [erroLista, setErroLista] = useState("");
   const [atualizacaoLista, setAtualizacaoLista] = useState(0);
+  const [datasSelecionadas, setDatasSelecionadas] = useState([]);
+  const [exportandoPDF, setExportandoPDF] = useState(false);
+  const [erroExportacao, setErroExportacao] = useState("");
   const [mensagem, setMensagem] = useState(null);
 
   useEffect(() => {
@@ -169,6 +174,73 @@ export default function CriancasPage() {
     }
   }
 
+  function chaveData(registro) {
+    return String(registro.data).slice(0, 10);
+  }
+
+  function alternarDataSelecionada(dataRegistro) {
+    setDatasSelecionadas((selecionadas) =>
+      selecionadas.includes(dataRegistro)
+        ? selecionadas.filter((dataSelecionada) => dataSelecionada !== dataRegistro)
+        : [...selecionadas, dataRegistro]
+    );
+    setErroExportacao("");
+  }
+
+  function alternarTodasAsDatas() {
+    if (datasSelecionadas.length === registros.length) {
+      setDatasSelecionadas([]);
+    } else {
+      setDatasSelecionadas(registros.map(chaveData));
+    }
+    setErroExportacao("");
+  }
+
+  async function exportarPDF() {
+    if (datasSelecionadas.length === 0) return;
+
+    setExportandoPDF(true);
+    setErroExportacao("");
+
+    try {
+      const detalhes = await Promise.all(
+        datasSelecionadas.map(async (dataRegistro) => {
+          const response = await axios.get(`${API_BASE_URL}/criancas`, {
+            params: { escola_id: escolaId, data: dataRegistro },
+          });
+          return {
+            data: dataRegistro,
+            manha: response.data.dados.manha,
+            tarde: response.data.dados.tarde,
+          };
+        })
+      );
+
+      detalhes.sort((a, b) => a.data.localeCompare(b.data));
+      const arquivo = await pdf(<ContagemCriancasPDF registros={detalhes} />).toBlob();
+      const url = URL.createObjectURL(arquivo);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download =
+        detalhes.length === 1
+          ? `quantidade-criancas-${detalhes[0].data}.pdf`
+          : `quantidade-criancas-${detalhes.length}-datas.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (error) {
+      console.error("Erro ao gerar PDF das quantidades:", error);
+      setErroExportacao(
+        error.response?.status === 404
+          ? "A API em execução ainda não disponibiliza os registros para exportação. Reinicie a API ou atualize o aplicativo."
+          : "Não foi possível gerar o PDF. Tente novamente."
+      );
+    } finally {
+      setExportandoPDF(false);
+    }
+  }
+
   return (
     <main className={styles.page}>
       <div className={styles.content}>
@@ -288,51 +360,100 @@ export default function CriancasPage() {
               ) : registros.length === 0 ? (
                 <p className={styles.listMessage}>Ainda não há registros salvos.</p>
               ) : (
-                <div className={styles.tableWrap}>
-                  <table className={styles.savedTable}>
-                    <thead>
-                      <tr>
-                        <th scope="col">Data</th>
-                        <th scope="col">Manhã</th>
-                        <th scope="col">Tarde</th>
-                        <th scope="col">Ação</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {registros.map((registro) => (
-                        <tr key={registro.data}>
-                          <th scope="row">
-                            {new Date(`${registro.data.slice(0, 10)}T12:00:00`).toLocaleDateString("pt-BR")}
-                          </th>
-                          <td>
-                            {registro.total_manha ?? 0} crianças
-                            <span className={styles.roomsCount}>
-                              {` (${registro.salas_manha}/13 salas)`}
-                            </span>
-                          </td>
-                          <td>
-                            {registro.total_tarde ?? 0} crianças
-                            <span className={styles.roomsCount}>
-                              {` (${registro.salas_tarde}/13 salas)`}
-                            </span>
-                          </td>
-                          <td>
-                            <button
-                              className={styles.viewButton}
-                              type="button"
-                              onClick={() => {
-                                setData(registro.data.slice(0, 10));
-                                window.scrollTo({ top: 0, behavior: "smooth" });
-                              }}
-                            >
-                              Ver lista
-                            </button>
-                          </td>
+                <>
+                  <div className={styles.exportToolbar}>
+                    <label className={styles.selectAll}>
+                      <input
+                        type="checkbox"
+                        checked={
+                          registros.length > 0 &&
+                          datasSelecionadas.length === registros.length
+                        }
+                        onChange={alternarTodasAsDatas}
+                        aria-label="Selecionar todas as datas"
+                      />
+                      Selecionar todas
+                    </label>
+                    <button
+                      className={styles.exportButton}
+                      type="button"
+                      onClick={exportarPDF}
+                      disabled={datasSelecionadas.length === 0 || exportandoPDF}
+                    >
+                      {exportandoPDF
+                        ? "Gerando PDF..."
+                        : datasSelecionadas.length === 0
+                          ? "Selecione datas para o PDF"
+                          : `Salvar ${datasSelecionadas.length} ${
+                              datasSelecionadas.length === 1 ? "data" : "datas"
+                            } em PDF`}
+                    </button>
+                  </div>
+
+                  {erroExportacao && (
+                    <p className={`${styles.listMessage} ${styles.error}`} role="alert">
+                      {erroExportacao}
+                    </p>
+                  )}
+
+                  <div className={styles.tableWrap}>
+                    <table className={styles.savedTable}>
+                      <thead>
+                        <tr>
+                          <th scope="col">Selecionar</th>
+                          <th scope="col">Data</th>
+                          <th scope="col">Manhã</th>
+                          <th scope="col">Tarde</th>
+                          <th scope="col">Ação</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {registros.map((registro) => {
+                          const dataRegistro = chaveData(registro);
+                          return (
+                            <tr key={dataRegistro}>
+                              <td>
+                                <input
+                                  type="checkbox"
+                                  checked={datasSelecionadas.includes(dataRegistro)}
+                                  onChange={() => alternarDataSelecionada(dataRegistro)}
+                                  aria-label={`Selecionar registro de ${new Date(`${dataRegistro}T12:00:00`).toLocaleDateString("pt-BR")}`}
+                                />
+                              </td>
+                              <th scope="row">
+                                {new Date(`${dataRegistro}T12:00:00`).toLocaleDateString("pt-BR")}
+                              </th>
+                              <td>
+                                {registro.total_manha ?? 0} crianças
+                                <span className={styles.roomsCount}>
+                                  {` (${registro.salas_manha}/13 salas)`}
+                                </span>
+                              </td>
+                              <td>
+                                {registro.total_tarde ?? 0} crianças
+                                <span className={styles.roomsCount}>
+                                  {` (${registro.salas_tarde}/13 salas)`}
+                                </span>
+                              </td>
+                              <td>
+                                <button
+                                  className={styles.viewButton}
+                                  type="button"
+                                  onClick={() => {
+                                    setData(dataRegistro);
+                                    window.scrollTo({ top: 0, behavior: "smooth" });
+                                  }}
+                                >
+                                  Ver lista
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
           )}
